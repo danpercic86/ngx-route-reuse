@@ -8,10 +8,10 @@
   "files": [],
   "references": [
     {
-      "path": "./projects/ng-cache-route-reuse/tsconfig.lib.json"
+      "path": "./projects/ngx-route-reuse/tsconfig.lib.json"
     },
     {
-      "path": "./projects/ng-cache-route-reuse/tsconfig.spec.json"
+      "path": "./projects/ngx-route-reuse/tsconfig.spec.json"
     },
     {
       "path": "./projects/demo/tsconfig.app.json"

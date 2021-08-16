@@ -18,7 +18,7 @@ module.exports = function (config) {
     coverageIstanbulReporter: {
       dir: require('path').join(
         __dirname,
-        '../../coverage/ng-cache-route-reuse'
+        '../../coverage/ngx-route-reuse'
       ),
       reports: ['html', 'lcovonly', 'text-summary'],
       fixWebpackSourcePaths: true,

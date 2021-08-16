@@ -1,5 +1,5 @@
 /*
- * Public API Surface of ng-cache-route-reuse
+ * Public API Surface of ngx-route-reuse
  */
 
 export * from './lib/ng-cache-route-reuse.service';

@@ -6,12 +6,12 @@ A simple angular route reuse strategy with attach/detach hooks.
 
 **Installation:**
 
-`npm install ng-cache-route-reuse --save`
+`npm install ngx-route-reuse --save`
 
 Import **`NgCacheRouteReuseModule`** into `AppModule`:
 
 ```typescript
-import { NgCacheRouteReuseModule } from 'ng-cache-route-reuse';
+import { NgCacheRouteReuseModule } from 'ngx-route-reuse';
 
 @NgModule({
   imports: [
@@ -44,7 +44,7 @@ const routes: Routes = [
 You can use hooks for performing additional subscribe/unsubscribe functionality:
 
 ```typescript
-import { NgCacheRouteReuseService } from 'ng-cache-route-reuse';
+import { NgCacheRouteReuseService } from 'ngx-route-reuse';
 
 @Component({})
 export class HomeComponent implements OnInit {

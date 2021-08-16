@@ -6,7 +6,7 @@ import {
   RouteReuseStrategy,
   Router,
 } from '@angular/router';
-import { NgCacheRouteReuseService } from 'ng-cache-route-reuse';
+import { NgCacheRouteReuseService } from 'ngx-route-reuse';
 import {
   routes as AppRoutes,
   AppRoutingModule,

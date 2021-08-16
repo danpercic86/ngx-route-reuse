@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { NgCacheRouteReuseService } from 'ng-cache-route-reuse';
+import { NgCacheRouteReuseService } from 'ngx-route-reuse';
 
 @Component({
   selector: 'app-route-one',
