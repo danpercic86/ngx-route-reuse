@@ -1,32 +1,34 @@
-import { ActivatedRouteSnapshot, DetachedRouteHandle, RouteReuseStrategy } from '@angular/router';
+import { ActivatedRouteSnapshot, RouteReuseStrategy } from '@angular/router';
 
-import { NgxRouteReuseStoreService } from './ngx-route-reuse-store.service';
+import { NgxRouteReuseStore } from './ngx-route-reuse-store.service';
+import { getRoutePath } from './utils';
+import { NgxDetachedRouteHandle } from './interfaces';
 
 const shouldReuse = (route: ActivatedRouteSnapshot) => !!route.data.reuse;
 
 export class NgxRouteReuseStrategy implements RouteReuseStrategy {
-  constructor(private readonly _storeService: NgxRouteReuseStoreService) {}
+  constructor(private readonly _storeService: NgxRouteReuseStore) {}
 
-  // eslint-disable-next-line class-methods-use-this
   shouldDetach(route: ActivatedRouteSnapshot): boolean {
     return shouldReuse(route);
   }
 
-  store(route: ActivatedRouteSnapshot, handle: DetachedRouteHandle): void {
-    if (handle) this._storeService.set(route.component, handle);
-    else this._storeService.delete(route.component);
+  store(route: ActivatedRouteSnapshot, handle: NgxDetachedRouteHandle): void {
+    if (handle) this._storeService.set(handle, route);
+    else this._storeService.delete(route);
   }
 
   shouldAttach(route: ActivatedRouteSnapshot): boolean {
-    return shouldReuse(route) ? this._storeService.has(route.component) : false;
+    return this._storeService.has(route);
   }
 
-  retrieve(route: ActivatedRouteSnapshot): DetachedRouteHandle | null {
-    return shouldReuse(route) ? this._storeService.get(route.component) : null;
+  retrieve(route: ActivatedRouteSnapshot): NgxDetachedRouteHandle | null {
+    return this._storeService.get(route).handle;
   }
 
-  // eslint-disable-next-line class-methods-use-this
   shouldReuseRoute(future: ActivatedRouteSnapshot, current: ActivatedRouteSnapshot): boolean {
-    return future.routeConfig === current.routeConfig;
+    return (
+      future.routeConfig === current.routeConfig || getRoutePath(future) === getRoutePath(current)
+    );
   }
 }

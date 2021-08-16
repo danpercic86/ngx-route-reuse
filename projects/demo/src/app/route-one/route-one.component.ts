@@ -1,31 +1,20 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { NgCacheRouteReuseService } from 'ngx-route-reuse';
+import { Component } from '@angular/core';
+import { ActivatedRouteSnapshot } from '@angular/router';
+import { OnAttach, OnDetach } from '../../../../ngx-route-reuse/src/lib/interfaces';
 
 @Component({
   selector: 'app-route-one',
   templateUrl: './route-one.component.html',
-  styleUrls: ['./route-one.component.scss'],
+  styleUrls: ['./route-one.component.scss']
 })
-export class RouteOneComponent implements OnInit, OnDestroy {
-  constructor(private cacheRouteReuseService: NgCacheRouteReuseService) {
-    this.cacheRouteReuseService.onAttach(RouteOneComponent).subscribe(() => {
-      // tslint:disable-next-line: no-console
-      console.debug('RouteOneComponent', 'attached');
-    });
-
-    this.cacheRouteReuseService.onDetach(RouteOneComponent).subscribe(() => {
-      // tslint:disable-next-line: no-console
-      console.debug('RouteOneComponent', 'detached');
-    });
+export class RouteOneComponent implements OnAttach, OnDetach {
+  ngOnAttach(previousRoute: ActivatedRouteSnapshot): void {
+    // eslint-disable-next-line no-console
+    console.debug('RouteOneComponent', 'on attach with previous route: ', previousRoute);
   }
 
-  public ngOnInit(): void {
-    // tslint:disable-next-line: no-console
-    console.debug('RouteOneComponent', 'inited');
-  }
-
-  public ngOnDestroy(): void {
-    // tslint:disable-next-line: no-console
+  ngOnDetach(): void {
+    // eslint-disable-next-line no-console
     console.debug('RouteOneComponent', 'destroyed');
   }
 }

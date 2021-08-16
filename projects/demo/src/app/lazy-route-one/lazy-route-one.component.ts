@@ -1,35 +1,20 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { NgCacheRouteReuseService } from 'ngx-route-reuse';
+import { Component } from '@angular/core';
+import { ActivatedRouteSnapshot } from '@angular/router';
+import { OnAttach, OnDetach } from '../../../../ngx-route-reuse/src/lib/interfaces';
 
 @Component({
   selector: 'app-lazy-route-one',
   templateUrl: './lazy-route-one.component.html',
-  styleUrls: ['./lazy-route-one.component.scss'],
+  styleUrls: ['./lazy-route-one.component.scss']
 })
-export class LazyRouteOneComponent implements OnInit, OnDestroy {
-  constructor(private cacheRouteReuseService: NgCacheRouteReuseService) {
-    this.cacheRouteReuseService
-      .onAttach(LazyRouteOneComponent)
-      .subscribe(() => {
-        // tslint:disable-next-line: no-console
-        console.debug('LazyRouteOneComponent', 'attached');
-      });
-
-    this.cacheRouteReuseService
-      .onDetach(LazyRouteOneComponent)
-      .subscribe(() => {
-        // tslint:disable-next-line: no-console
-        console.debug('LazyRouteOneComponent', 'detached');
-      });
+export class LazyRouteOneComponent implements OnAttach, OnDetach {
+  ngOnAttach(previousRoute: ActivatedRouteSnapshot): void {
+    // eslint-disable-next-line no-console
+    console.debug('LazyRouteOneComponent', 'on attach with route: ', previousRoute);
   }
 
-  public ngOnInit(): void {
-    // tslint:disable-next-line: no-console
-    console.debug('LazyRouteOneComponent', 'inited');
-  }
-
-  public ngOnDestroy(): void {
-    // tslint:disable-next-line: no-console
+  ngOnDetach(): void {
+    // eslint-disable-next-line no-console
     console.debug('LazyRouteOneComponent', 'destroyed');
   }
 }

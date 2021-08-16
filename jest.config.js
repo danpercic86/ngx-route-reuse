@@ -16,4 +16,5 @@ module.exports = {
   collectCoverage: true,
   coverageDirectory: 'coverage',
   clearMocks: true,
+  setupFilesAfterEnv: ['<rootDir>/projects/ngx-route-reuse/src/test-setup.ts'],
 };

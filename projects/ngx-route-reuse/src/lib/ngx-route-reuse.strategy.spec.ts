@@ -1,21 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import {
-  ActivatedRoute,
-  Route,
-  RouteReuseStrategy,
-  Router,
-} from '@angular/router';
-import {
-  routes as AppRoutes,
-  AppRoutingModule,
-} from 'projects/demo/src/app/app-routing.module';
-import { AppComponent } from 'projects/demo/src/app/app.component';
-import { routes as LazyRouteOneRoutes } from 'projects/demo/src/app/lazy-route-one/lazy-route-one-routing.module';
+import { ActivatedRoute, ActivatedRouteSnapshot, Route, Router, RouteReuseStrategy } from '@angular/router';
+import { AppRoutingModule, routes as AppRoutes } from '../../../demo/src/app/app-routing.module';
+import { AppComponent } from '../../../demo/src/app/app.component';
+import { routes as LazyRouteOneRoutes } from '../../../demo/src/app/lazy-route-one/lazy-route-one-routing.module';
 
-import { NgxRouteReuseStoreService } from './ngx-route-reuse-store.service';
+import { NgxRouteReuseStore } from './ngx-route-reuse-store.service';
 import { NgxRouteReuseModule } from './ngx-route-reuse.module';
-import { NgxRouteReuseService } from './ngx-route-reuse.service';
 
 const testRouteReuse = (config: {
   route: Route;
@@ -24,24 +15,24 @@ const testRouteReuse = (config: {
 }) => {
   describe(`route with url '${config.routeUrl}'`, () => {
     let router: Router = null;
+    let activatedRouteSnapshot: ActivatedRouteSnapshot = null;
     let fixture: ComponentFixture<AppComponent> = null;
     let strategy: RouteReuseStrategy = null;
-    let store: NgxRouteReuseStoreService = null;
+    let store: NgxRouteReuseStore = null;
 
     beforeEach(() => {
       TestBed.configureTestingModule({
         imports: [AppRoutingModule, NgxRouteReuseModule],
         declarations: [AppComponent],
         providers: [
-          NgxRouteReuseStoreService,
-          NgxRouteReuseService
-        ],
+          NgxRouteReuseStore
+        ]
       });
 
       router = TestBed.inject(Router);
       fixture = TestBed.createComponent(AppComponent);
       strategy = TestBed.inject(RouteReuseStrategy);
-      store = TestBed.inject(NgxRouteReuseStoreService)
+      store = TestBed.inject(NgxRouteReuseStore);
 
       store.clear();
       router.initialNavigation();
@@ -52,7 +43,7 @@ const testRouteReuse = (config: {
     });
 
     config.urls.forEach((url) => {
-      describe(`should be detached after '${config.routeUrl} -> ${url}' navigation`, async () => {
+      describe(`should be detached after '${config.routeUrl} -> ${url}' navigation`, () => {
         let shouldDetachSpy: jest.SpyInstance;
 
         beforeEach(async () => {
@@ -60,10 +51,11 @@ const testRouteReuse = (config: {
 
           await router.navigateByUrl(config.routeUrl);
           await router.navigateByUrl(url);
+          activatedRouteSnapshot = TestBed.inject(ActivatedRouteSnapshot);
         });
 
         it(`store should have the detached route`, () => {
-          expect(store.has(config.route.component)).toBeTruthy();
+          expect(store.has(activatedRouteSnapshot)).toBeTruthy();
         });
 
         it(`'shouldDetach' should return 'true'`, () => {
@@ -94,10 +86,12 @@ const testRouteReuse = (config: {
           endRoute = fixture.debugElement
             .query(By.directive(config.route.component))
             .injector.get(ActivatedRoute);
+
+          activatedRouteSnapshot = TestBed.inject(ActivatedRouteSnapshot);
         });
 
         it(`the store should not have the attached route`, () => {
-          expect(store.has(config.route.component)).toBeFalsy();
+          expect(store.has(activatedRouteSnapshot)).toBeFalsy();
         });
 
         it(`the strategy 'shouldAttach' should return 'true'`, () => {
@@ -117,12 +111,12 @@ describe('NgxRouteReuseStrategy', () => {
   testRouteReuse({
     route: AppRoutes[0],
     routeUrl: 'one',
-    urls: ['two', 'lazy-one', 'lazy-two'],
+    urls: ['two', 'lazy-one', 'lazy-two']
   });
 
   testRouteReuse({
     route: LazyRouteOneRoutes[0],
     routeUrl: 'lazy-one',
-    urls: ['one', 'two', 'lazy-two'],
+    urls: ['one', 'two', 'lazy-two']
   });
 });

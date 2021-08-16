@@ -1,81 +1,34 @@
-import { Injectable, Type } from '@angular/core';
-import { DetachedRouteHandle } from '@angular/router';
-import { Observable, Subject } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
-
-export enum StoreActionType {
-  Set,
-  Delete,
-  Clear,
-}
-
-export interface StoreAction {
-  type: StoreActionType;
-  component?: string | Type<unknown>;
-}
-
-export interface StoreActionOptions {
-  emitEvent?: boolean;
-}
+import { Injectable } from '@angular/core';
+import { ActivatedRouteSnapshot } from '@angular/router';
+import { getRoutePath } from './utils';
+import { NgxDetachedRouteHandle, OnAttach, OnDetach, StoreObject } from './interfaces';
 
 @Injectable({
   providedIn: 'root',
 })
-export class NgxRouteReuseStoreService {
-  private readonly _detachedRouteHandles = new Map<string | Type<unknown>, DetachedRouteHandle>();
+export class NgxRouteReuseStore {
+  private readonly _store = new Map<string, StoreObject>();
 
-  private readonly _action$ = new Subject<StoreAction>();
-
-  private _dispatch(type: StoreActionType, component: string | Type<unknown> = null): void {
-    this._action$.next({ type, component });
+  set(handle: NgxDetachedRouteHandle, route: ActivatedRouteSnapshot): void {
+    (handle.componentRef?.instance as OnDetach)?.ngOnDetach();
+    this._store.set(getRoutePath(route), { handle, previousRoute: route });
   }
 
-  on(type: StoreActionType, component: string | Type<unknown>): Observable<string | Type<unknown>> {
-    return this._action$.pipe(
-      filter(action => action.type === type),
-      filter(action => action.component === component),
-      map(action => action.component),
-    );
+  get(route: ActivatedRouteSnapshot): StoreObject {
+    const storeObject = this._store.get(getRoutePath(route));
+    (storeObject.handle.componentRef?.instance as OnAttach)?.ngOnAttach(storeObject.previousRoute);
+    return storeObject;
   }
 
-  set(
-    component: string | Type<unknown>,
-    handle: DetachedRouteHandle,
-    { emitEvent = true }: StoreActionOptions = {},
-  ): void {
-    this._detachedRouteHandles.set(component, handle);
-
-    if (emitEvent) {
-      this._dispatch(StoreActionType.Set, component);
-    }
+  has(route: ActivatedRouteSnapshot): boolean {
+    return this._store.has(getRoutePath(route));
   }
 
-  get(component: string | Type<unknown>): DetachedRouteHandle {
-    return this._detachedRouteHandles.get(component);
+  delete(route: ActivatedRouteSnapshot): boolean {
+    return this._store.delete(getRoutePath(route));
   }
 
-  has(component: string | Type<unknown>): boolean {
-    return this._detachedRouteHandles.has(component);
-  }
-
-  delete(
-    component: string | Type<unknown>,
-    { emitEvent = true }: StoreActionOptions = {},
-  ): boolean {
-    const deleted = this._detachedRouteHandles.delete(component);
-
-    if (emitEvent && deleted) {
-      this._dispatch(StoreActionType.Delete, component);
-    }
-
-    return deleted;
-  }
-
-  clear({ emitEvent = true }: StoreActionOptions = {}): void {
-    this._detachedRouteHandles.clear();
-
-    if (emitEvent) {
-      this._dispatch(StoreActionType.Clear);
-    }
+  clear(): void {
+    this._store.clear();
   }
 }
