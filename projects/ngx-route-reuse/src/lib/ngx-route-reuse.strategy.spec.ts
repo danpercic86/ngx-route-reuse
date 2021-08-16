@@ -6,7 +6,6 @@ import {
   RouteReuseStrategy,
   Router,
 } from '@angular/router';
-import { NgCacheRouteReuseService } from 'ngx-route-reuse';
 import {
   routes as AppRoutes,
   AppRoutingModule,
@@ -14,8 +13,9 @@ import {
 import { AppComponent } from 'projects/demo/src/app/app.component';
 import { routes as LazyRouteOneRoutes } from 'projects/demo/src/app/lazy-route-one/lazy-route-one-routing.module';
 
-import { NgCacheRouteReuseStoreService } from './ng-cache-route-reuse-store.service';
-import { NgCacheRouteReuseModule } from './ng-cache-route-reuse.module';
+import { NgxRouteReuseStoreService } from './ngx-route-reuse-store.service';
+import { NgxRouteReuseModule } from './ngx-route-reuse.module';
+import { NgxRouteReuseService } from './ngx-route-reuse.service';
 
 const testRouteReuse = (config: {
   route: Route;
@@ -26,28 +26,22 @@ const testRouteReuse = (config: {
     let router: Router = null;
     let fixture: ComponentFixture<AppComponent> = null;
     let strategy: RouteReuseStrategy = null;
-    let store: NgCacheRouteReuseStoreService = null;
+    let store: NgxRouteReuseStoreService = null;
 
     beforeEach(() => {
       TestBed.configureTestingModule({
-        imports: [AppRoutingModule, NgCacheRouteReuseModule],
+        imports: [AppRoutingModule, NgxRouteReuseModule],
         declarations: [AppComponent],
         providers: [
-          {
-            provide: NgCacheRouteReuseStoreService,
-            useFactory: NgCacheRouteReuseStoreService.getInstance,
-          },
-          {
-            provide: NgCacheRouteReuseService,
-            useFactory: NgCacheRouteReuseService.getInstance,
-          },
+          NgxRouteReuseStoreService,
+          NgxRouteReuseService
         ],
       });
 
       router = TestBed.inject(Router);
       fixture = TestBed.createComponent(AppComponent);
       strategy = TestBed.inject(RouteReuseStrategy);
-      store = NgCacheRouteReuseStoreService.getInstance();
+      store = TestBed.inject(NgxRouteReuseStoreService)
 
       store.clear();
       router.initialNavigation();
@@ -59,33 +53,34 @@ const testRouteReuse = (config: {
 
     config.urls.forEach((url) => {
       describe(`should be detached after '${config.routeUrl} -> ${url}' navigation`, async () => {
-        let shouldDetachSpy: jasmine.Spy;
+        let shouldDetachSpy: jest.SpyInstance;
 
         beforeEach(async () => {
-          shouldDetachSpy = spyOn(strategy, `shouldDetach`).and.callThrough();
+          shouldDetachSpy = jest.spyOn(strategy, `shouldDetach`);
 
           await router.navigateByUrl(config.routeUrl);
           await router.navigateByUrl(url);
         });
 
         it(`store should have the detached route`, () => {
-          expect(store.has(config.route.component)).toBeTrue();
+          expect(store.has(config.route.component)).toBeTruthy();
         });
 
         it(`'shouldDetach' should return 'true'`, () => {
-          expect(shouldDetachSpy.calls.mostRecent().returnValue).toBeTrue();
+          console.log(shouldDetachSpy.mock);
+          expect(shouldDetachSpy.mock.calls[0][0]).toBeTruthy();
         });
       });
     });
 
     config.urls.forEach((url) => {
       describe(`should be attached after '${config.routeUrl} -> ${url}' navigation`, () => {
-        let shouldAttachSpy: jasmine.Spy;
+        let shouldAttachSpy: jest.SpyInstance;
         let startRoute: ActivatedRoute;
         let endRoute: ActivatedRoute;
 
         beforeEach(async () => {
-          shouldAttachSpy = spyOn(strategy, `shouldAttach`).and.callThrough();
+          shouldAttachSpy = jest.spyOn(strategy, `shouldAttach`);
 
           await router.navigateByUrl(config.routeUrl);
 
@@ -102,11 +97,12 @@ const testRouteReuse = (config: {
         });
 
         it(`the store should not have the attached route`, () => {
-          expect(store.has(config.route.component)).toBeFalse();
+          expect(store.has(config.route.component)).toBeFalsy();
         });
 
-        it(`the strategy 'souldAttach' should return 'true'`, () => {
-          expect(shouldAttachSpy.calls.mostRecent().returnValue).toBeTrue();
+        it(`the strategy 'shouldAttach' should return 'true'`, () => {
+          console.log(shouldAttachSpy.mock);
+          expect(shouldAttachSpy.mock.calls[0][0]).toBeTruthy();
         });
 
         it(`'ActivatedRoute' should be the same`, () => {
@@ -117,7 +113,7 @@ const testRouteReuse = (config: {
   });
 };
 
-describe('NgCacheRouteReuseStrategy', () => {
+describe('NgxRouteReuseStrategy', () => {
   testRouteReuse({
     route: AppRoutes[0],
     routeUrl: 'one',

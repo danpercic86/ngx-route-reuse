@@ -1,5 +1,12 @@
 {
   "extends": "../../.eslintrc.json",
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "sourceType": "module",
+    "project": [
+      "projects/ngx-route-reuse/tsconfig.*?.json"
+    ]
+  },
   "overrides": [
     {
       "files": [
